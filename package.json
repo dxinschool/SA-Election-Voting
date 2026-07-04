@@ -1,0 +1,16 @@
+{
+  "name": "sba-election",
+  "version": "1.0.0",
+  "description": "SBA Election Voting System",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "ejs": "^3.1.9",
+    "express": "^4.18.2",
+    "express-session": "^1.19.0",
+    "pg": "^8.22.0",
+    "sql.js": "^1.14.1"
+  }
+}

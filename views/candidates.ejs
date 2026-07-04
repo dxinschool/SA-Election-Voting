@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> — Candidates</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #111111; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+    a { text-decoration: none; }
+
+    .container { width: 100%; max-width: 1000px; padding: 24px; }
+
+    .header { position: relative; display: flex; align-items: center; justify-content: space-between; padding: 16px 0; margin-bottom: 16px; }
+    .header-left h1 { font-size: 1.25rem; font-weight: 600; }
+    .header-center { position: absolute; left: 50%; transform: translateX(-50%); }
+    .header-center .countdown { display: flex; align-items: center; gap: 8px; font-size: 1.1rem; font-weight: 600; color: #ffffff; letter-spacing: 0.02em; }
+    .header-center .countdown .closes-label { font-size: 0.7rem; color: #71717a; font-weight: 500; margin-right: 6px; letter-spacing: 0.04em; }
+    .header-center .countdown .num { color: #ffffff; font-weight: 600; min-width: 22px; text-align: center; }
+    .header-center .countdown .sep { color: #52525b; }
+    .header-center .countdown .unit { display: flex; flex-direction: column; align-items: center; }
+    .header-center .countdown .unit .num { line-height: 1; }
+    .header-center .countdown .unit .unit-label { font-size: 0.6rem; color: #52525b; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+    .header-center .countdown.ended { color: #ef4444; }
+    .header-center .countdown.ended .num { color: #ef4444; }
+    .header-right { display: flex; align-items: center; gap: 20px; }
+    .header a { font-size: 0.875rem; font-weight: 500; color: #a3a3a3; transition: color 0.15s; }
+    .header a:hover { color: #ffffff; }
+
+    .hero { text-align: center; margin: 48px 0 40px; }
+    .hero h2 { font-size: 2rem; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 8px; }
+    .hero p { font-size: 1rem; color: #a3a3a3; }
+
+    .candidate-grid { display: grid; width: 100%; grid-template-columns: repeat(1, 1fr); gap: 16px; }
+    @media (min-width: 640px) { .candidate-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 1024px) { .candidate-grid { grid-template-columns: repeat(3, 1fr); } }
+
+    .candidate-card { position: relative; background: #09090b; border: 1px solid #262626; border-radius: 8px; display: flex; flex-direction: column; aspect-ratio: 1; overflow: hidden; transition: border-color 0.15s; }
+    .candidate-card:hover { border-color: #404040; }
+
+    .card-banner { position: relative; height: 45%; flex-shrink: 0; overflow: hidden; }
+    .card-banner .banner-bg { width: 100%; height: 100%; background: linear-gradient(135deg, #8A5DF4, #4c1d95); opacity: 0.5; }
+    .card-banner .banner-fade { position: absolute; inset: 0; background: linear-gradient(to top, #09090b, transparent 60%); }
+
+    .card-body { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 0 20px 20px; position: relative; z-index: 2; }
+    .avatar { width: 72px; height: 72px; border-radius: 50%; background: #8A5DF4; border: 4px solid #111111; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; font-weight: 700; color: #ffffff; margin-top: -36px; margin-bottom: 10px; flex-shrink: 0; box-shadow: 0 2px 12px rgba(0,0,0,0.3); }
+    .candidate-name { font-size: 1.05rem; font-weight: 600; color: #ffffff; text-align: center; margin-bottom: auto; padding-top: 4px; }
+
+    .card-footer { width: 100%; padding: 0 20px 20px; display: flex; justify-content: center; gap: 8px; }
+    .view-btn { height: 36px; min-width: 110px; border-radius: 6px; font-size: 0.8rem; font-weight: 500; font-family: 'Inter', sans-serif; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; transition: background 0.15s; border: 1px solid #262626; background: #111111; color: #ffffff; }
+    .view-btn svg { width: 15px; height: 15px; }
+    .view-btn:hover { background: #262626; }
+
+    .ballot-section { margin-top: 32px; }
+    .ballot-card { background: #09090b; border: 1px solid #262626; border-radius: 8px; padding: 28px; }
+    .ballot-header { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+    .ballot-header .ballot-icon { width: 36px; height: 36px; border-radius: 8px; background: rgba(138,93,244,0.12); color: #8A5DF4; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .ballot-header .ballot-icon svg { width: 18px; height: 18px; }
+    .ballot-header .ballot-title { font-size: 1.1rem; font-weight: 700; color: #ffffff; }
+    .ballot-subtitle { font-size: 0.8rem; color: #71717a; margin-bottom: 24px; margin-left: 48px; }
+
+    .ballot-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .ballot-rank { width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.05); border: 1px solid #262626; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: #71717a; flex-shrink: 0; }
+    .ballot-rank.active { border-color: #8A5DF4; color: #8A5DF4; background: rgba(138,93,244,0.1); }
+
+    .ballot-row select { flex: 1; height: 44px; padding: 0 12px; background: #111111; border: 1px solid #262626; border-radius: 6px; font-size: 0.85rem; font-weight: 500; font-family: 'Inter', sans-serif; color: #ffffff; outline: none; cursor: pointer; transition: border-color 0.15s; appearance: none; background-image: url("data:image/svg+xml,%3Csvg fill='none' viewBox='0 0 24 24' stroke='%2371717a'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; background-size: 16px; }
+    .ballot-row select:focus { border-color: #8A5DF4; }
+    .ballot-row select option { background: #111111; color: #ffffff; }
+    .ballot-row select:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .ballot-preview {
+      width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 700; color: #71717a;
+      background: rgba(255,255,255,0.04); border: 1px solid #262626;
+      transition: all 0.15s;
+    }
+    .ballot-preview.active { background: rgba(138,93,244,0.15); border-color: #8A5DF4; color: #8A5DF4; }
+
+    .ballot-submit { margin-top: 20px; display: flex; gap: 12px; }
+    .ballot-submit-btn { height: 44px; padding: 0 28px; border: none; border-radius: 6px; font-size: 0.875rem; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; background: #8A5DF4; color: #ffffff; transition: background 0.15s; }
+    .ballot-submit-btn:hover { background: #7c3aed; }
+    .ballot-submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .abstain-section { margin-top: 32px; }
+    .abstain-card { display: flex; align-items: center; gap: 16px; background: #09090b; border: 1px solid #262626; border-radius: 8px; padding: 20px 24px; transition: border-color 0.15s; }
+    .abstain-card:hover { border-color: #404040; }
+    .abstain-icon { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.04); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .abstain-icon svg { width: 20px; height: 20px; color: #71717a; }
+    .abstain-text { flex: 1; }
+    .abstain-title { font-size: 0.95rem; font-weight: 600; color: #e4e4e7; margin-bottom: 2px; }
+    .abstain-desc { font-size: 0.8rem; color: #71717a; }
+    .abstain-btn { height: 38px; padding: 0 20px; border: 1px solid #52525b; border-radius: 6px; font-size: 0.8rem; font-weight: 500; font-family: 'Inter', sans-serif; cursor: pointer; background: #111111; color: #a3a3a3; white-space: nowrap; transition: all 0.15s; }
+    .abstain-btn:hover { border-color: #ef4444; color: #ef4444; background: rgba(239,68,68,0.06); }
+
+    .bottom-nav { display: flex; justify-content: center; margin-top: 32px; padding-bottom: 32px; }
+    .back-btn { height: 44px; padding: 0 24px; border: 1px solid #262626; border-radius: 6px; font-size: 0.875rem; font-weight: 500; font-family: 'Inter', sans-serif; cursor: pointer; background: #111111; color: #ffffff; display: inline-flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; transition: background 0.15s; }
+    .back-btn:hover { background: #262626; }
+    .back-btn svg { width: 16px; height: 16px; }
+
+    @media (max-width: 768px) {
+      .container { padding: 16px; }
+      .header-left h1 { font-size: 1rem; }
+      .header-center .countdown { font-size: 0.85rem; gap: 4px; }
+      .hero { margin: 28px 0 24px; }
+      .hero h2 { font-size: 1.5rem; }
+      .candidate-grid { gap: 12px; }
+      .card-footer { flex-direction: column; align-items: center; }
+      .view-btn { width: 100%; }
+      .ballot-card { padding: 20px 16px; }
+      .ballot-subtitle { margin-left: 0; }
+      .ballot-submit { flex-direction: column; }
+      .abstain-card { flex-direction: column; text-align: center; padding: 20px 16px; }
+      .bottom-nav { margin-top: 24px; }
+    }
+    @media (max-width: 480px) {
+      .candidate-card { aspect-ratio: auto; min-height: 340px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="header-left"><h1><%= title %></h1></div>
+      <div class="header-center"><div class="countdown" id="countdown"></div></div>
+      <div class="header-right">
+        <a href="/home">Dashboard</a>
+        <a href="/logout">Sign Out</a>
+      </div>
+    </div>
+
+    <div class="hero">
+      <h2>Meet the Candidates</h2>
+      <p>View their profiles and cast your ranked vote</p>
+    </div>
+
+    <div class="candidate-grid">
+      <% candidates.forEach(function(c) { %>
+        <div class="candidate-card">
+          <div class="card-banner"><div class="banner-bg"></div><div class="banner-fade"></div></div>
+          <div class="card-body">
+            <div class="avatar"><%= c.CNAME.charAt(0) %></div>
+            <div class="candidate-name"><%= c.CNAME %></div>
+          </div>
+          <div class="card-footer">
+            <a href="/candidate/<%= c.SLUG %>" class="view-btn">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+              View Profile
+            </a>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+
+    <% if (!votingEnabled) { %>
+      <div style="text-align:center;padding:16px;margin-top:24px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;font-size:0.85rem;color:#ef4444;">
+        Voting is currently disabled by the administrator.
+      </div>
+    <% } %>
+
+    <% if (!viewOnly && votingEnabled) { %>
+    <div class="ballot-section">
+      <div class="ballot-card">
+        <div class="ballot-header">
+          <div class="ballot-icon">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+          <div class="ballot-title">Ranked Ballot</div>
+        </div>
+        <div class="ballot-subtitle">Rank candidates by preference. First preference is required.</div>
+
+        <form id="ballot-form" method="POST" action="/vote">
+          <% var numPrefs = candidates.length - 1; %>
+          <% for (var i = 0; i < numPrefs; i++) { %>
+            <div class="ballot-row">
+              <div class="ballot-rank<%= i === 0 ? ' active' : '' %>"><%= i + 1 %></div>
+              <select name="pref<%= i + 1 %>">
+                <option value="">— Select candidate —</option>
+                <% candidates.forEach(function(c) { %>
+                  <option value="<%= c.CID %>" data-initial="<%= c.CNAME.charAt(0) %>"><%= c.CNAME %></option>
+                <% }); %>
+              </select>
+              <span class="ballot-preview"></span>
+            </div>
+          <% } %>
+          <div class="ballot-submit">
+            <button type="submit" class="ballot-submit-btn" id="submit-vote" disabled>Submit Vote</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="abstain-section">
+      <div class="abstain-card">
+        <div class="abstain-icon">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+        </div>
+        <div class="abstain-text">
+          <div class="abstain-title">Don't want to vote?</div>
+          <div class="abstain-desc">You may cast a blank vote to officially abstain</div>
+        </div>
+        <form method="POST" action="/vote">
+          <button type="submit" class="abstain-btn" name="blank" value="1">Abstain</button>
+        </form>
+      </div>
+    </div>
+    <% } %>
+
+    <div class="bottom-nav">
+      <a href="/home" class="back-btn">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        Back to Dashboard
+      </a>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      var el = document.getElementById('countdown');
+      if (!el) return;
+      var deadline = new Date('<%= deadline %>').getTime();
+      function update() {
+        var now = Date.now();
+        var diff = deadline - now;
+        if (diff <= 0) {
+          el.className = 'countdown ended';
+          el.innerHTML = 'Polls closed';
+          document.dispatchEvent(new Event('pollsclosed'));
+          return;
+        }
+        var d = Math.floor(diff / 86400000);
+        var h = Math.floor((diff % 86400000) / 3600000);
+        var m = Math.floor((diff % 3600000) / 60000);
+        var s = Math.floor((diff % 60000) / 1000);
+        el.innerHTML =
+          '<span class="closes-label">Polls close in</span>' +
+          '<div class="unit"><span class="num">' + d + '</span><span class="unit-label">days</span></div>' +
+          '<span class="sep">:</span>' +
+          '<div class="unit"><span class="num">' + pad(h) + '</span><span class="unit-label">hrs</span></div>' +
+          '<span class="sep">:</span>' +
+          '<div class="unit"><span class="num">' + pad(m) + '</span><span class="unit-label">min</span></div>' +
+          '<span class="sep">:</span>' +
+          '<div class="unit"><span class="num">' + pad(s) + '</span><span class="unit-label">sec</span></div>';
+      }
+      function pad(n) { return n < 10 ? '0' + n : '' + n; }
+      update();
+      setInterval(update, 1000);
+    })();
+
+    (function() {
+      var selects = document.querySelectorAll('#ballot-form select');
+      if (!selects.length) return;
+      function validate() {
+        var values = [];
+        selects.forEach(function(s) { if (s.value) values.push(s.value); });
+        var unique = new Set(values);
+        var hasFirst = selects[0].value !== '';
+        var hasDupes = values.length !== unique.size;
+        document.getElementById('submit-vote').disabled = !hasFirst || hasDupes;
+      }
+      function clearDuplicates(changed) {
+        selects.forEach(function(other) {
+          if (other !== changed && other.value === changed.value) {
+            other.value = '';
+            updatePreview(other);
+          }
+        });
+      }
+      function updatePreview(sel) {
+        var preview = sel.parentNode.querySelector('.ballot-preview');
+        var opt = sel.options[sel.selectedIndex];
+        if (opt && opt.value) {
+          preview.textContent = opt.getAttribute('data-initial');
+          preview.className = 'ballot-preview active';
+        } else {
+          preview.textContent = '';
+          preview.className = 'ballot-preview';
+        }
+      }
+      selects.forEach(function(s) {
+        s.addEventListener('change', function() {
+          clearDuplicates(this);
+          updatePreview(this);
+          validate();
+        });
+      });
+      validate();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> — Teacher Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #111111;
+      color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    a { text-decoration: none; color: inherit; }
+
+    .form-container { width: 100%; max-width: 400px; }
+    .header-text { text-align: center; margin-bottom: 32px; }
+    .header-text h1 { font-size: 1.5rem; font-weight: 600; margin-bottom: 4px; }
+    .header-text p { font-size: 0.875rem; color: #a3a3a3; }
+
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 8px; }
+    .form-group input {
+      width: 100%; height: 44px; padding: 8px 12px;
+      background: #111111; border: 1px solid #262626; border-radius: 6px;
+      font-size: 0.75rem; font-weight: 500; font-family: 'Inter', sans-serif;
+      color: #ffffff; outline: none;
+    }
+    .form-group input:focus { border-color: #404040; }
+
+    .btn {
+      width: 100%; height: 44px; border: none; border-radius: 6px;
+      font-size: 0.875rem; font-weight: 500; font-family: 'Inter', sans-serif;
+      cursor: pointer; background: #8A5DF4; color: #ffffff;
+    }
+    .btn:hover { background: #7c3aed; }
+
+    .error-msg {
+      font-size: 0.8rem; color: #ef4444; text-align: center; margin-bottom: 16px;
+      padding: 10px; background: rgba(239,68,68,0.08);
+      border: 1px solid rgba(239,68,68,0.15); border-radius: 6px;
+    }
+
+    .footer-text { text-align: center; margin-top: 24px; font-size: 0.75rem; color: #a3a3a3; }
+    .footer-text a { text-decoration: underline; text-underline-offset: 4px; }
+    .footer-text a:hover { color: #8A5DF4; }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <div class="header-text">
+      <h1>Teacher Login</h1>
+      <p>Enter the admin password to manage the election</p>
+    </div>
+
+    <% if (error) { %><div class="error-msg"><%= error %></div><% } %>
+
+    <form method="POST" action="/teacher/login">
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required>
+      </div>
+      <button type="submit" class="btn">Sign In</button>
+    </form>
+
+    <div class="footer-text">
+      <a href="/">Back to Student Login</a>
+    </div>
+  </div>
+</body>
+</html>

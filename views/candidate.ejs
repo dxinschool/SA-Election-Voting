@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> — <%= candidate.CNAME %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #111111; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+    a { text-decoration: none; }
+
+    .container { width: 100%; max-width: 1000px; padding: 24px; }
+
+    .header { position: relative; display: flex; align-items: center; justify-content: space-between; padding: 16px 0; margin-bottom: 16px; }
+    .header-left h1 { font-size: 1.25rem; font-weight: 600; }
+    .header-center { position: absolute; left: 50%; transform: translateX(-50%); }
+    .header-center .countdown { display: flex; align-items: center; gap: 8px; font-size: 1.1rem; font-weight: 600; color: #ffffff; letter-spacing: 0.02em; }
+    .header-center .countdown .closes-label { font-size: 0.7rem; color: #71717a; font-weight: 500; margin-right: 6px; letter-spacing: 0.04em; }
+    .header-center .countdown .num { color: #ffffff; font-weight: 600; min-width: 22px; text-align: center; }
+    .header-center .countdown .sep { color: #52525b; }
+    .header-center .countdown .unit { display: flex; flex-direction: column; align-items: center; }
+    .header-center .countdown .unit .num { line-height: 1; }
+    .header-center .countdown .unit .unit-label { font-size: 0.6rem; color: #52525b; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+    .header-center .countdown.ended { color: #ef4444; }
+    .header-center .countdown.ended .num { color: #ef4444; }
+    .header-right { display: flex; align-items: center; gap: 20px; }
+    .header a { font-size: 0.875rem; font-weight: 500; color: #a3a3a3; transition: color 0.15s; }
+    .header a:hover { color: #ffffff; }
+
+    .profile-card { position: relative; border-radius: 12px; overflow: hidden; background: #09090b; border: 1px solid #262626; }
+    .profile-banner { width: 100%; height: 200px; background: linear-gradient(135deg, #8A5DF4 0%, #4c1d95 50%, #1e3a5f 100%); position: relative; }
+    .profile-banner .banner-fade { position: absolute; inset: 0; background: linear-gradient(to top, #09090b, transparent 70%); }
+
+    .profile-body { padding: 0 32px 32px; position: relative; z-index: 2; margin-top: -72px; }
+    .profile-avatar { width: 128px; height: 128px; border-radius: 50%; background: #8A5DF4; border: 6px solid #111111; display: flex; align-items: center; justify-content: center; font-size: 2.8rem; font-weight: 700; color: #ffffff; margin-bottom: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.3); }
+    .profile-name { font-size: 1.8rem; font-weight: 700; color: #ffffff; margin-bottom: 4px; letter-spacing: -0.02em; }
+    .profile-pos { font-size: 0.9rem; color: #a3a3a3; margin-bottom: 20px; }
+
+    .profile-desc { background: #111111; border: 1px solid #262626; border-radius: 8px; padding: 16px 20px; font-size: 0.9rem; color: #d4d4d8; line-height: 1.7; margin-bottom: 24px; }
+
+    .member-title { font-size: 0.7rem; font-weight: 600; color: #71717a; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; }
+    .member-list { display: flex; flex-direction: column; gap: 10px; }
+    .member-item { display: flex; align-items: center; gap: 12px; background: #111111; border: 1px solid #262626; border-radius: 6px; padding: 10px 14px; transition: border-color 0.15s; }
+    .member-item:hover { border-color: #404040; }
+    .member-avatar { width: 36px; height: 36px; border-radius: 50%; background: rgba(138,93,244,0.12); color: #8A5DF4; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; flex-shrink: 0; }
+    .member-info { flex: 1; }
+    .member-info .name { font-size: 0.85rem; font-weight: 600; color: #ffffff; }
+    .member-info .role { font-size: 0.75rem; color: #71717a; margin-top: 1px; }
+
+    .bottom-nav { display: flex; justify-content: center; margin-top: 32px; padding-bottom: 32px; }
+    .back-btn { height: 44px; padding: 0 24px; border: 1px solid #262626; border-radius: 6px; font-size: 0.875rem; font-weight: 500; font-family: 'Inter', sans-serif; cursor: pointer; background: #111111; color: #ffffff; display: inline-flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; transition: background 0.15s; }
+    .back-btn:hover { background: #262626; }
+    .back-btn svg { width: 16px; height: 16px; }
+
+    @media (max-width: 768px) {
+      .container { padding: 16px; }
+      .profile-banner { height: 140px; }
+      .profile-body { padding: 0 20px 20px; margin-top: -56px; }
+      .profile-avatar { width: 96px; height: 96px; font-size: 2rem; border-width: 4px; }
+      .profile-name { font-size: 1.4rem; }
+      .profile-desc { padding: 14px 16px; font-size: 0.85rem; }
+      .bottom-nav { margin-top: 24px; }
+    }
+    @media (max-width: 480px) {
+      .profile-banner { height: 100px; }
+      .profile-avatar { width: 72px; height: 72px; font-size: 1.5rem; }
+      .profile-name { font-size: 1.1rem; }
+      .profile-pos { font-size: 0.8rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="header-left"><h1><%= title %></h1></div>
+      <div class="header-center"><div class="countdown" id="countdown"></div></div>
+      <div class="header-right">
+        <a href="/candidates">Candidates</a>
+        <a href="/home">Dashboard</a>
+        <a href="/logout">Sign Out</a>
+      </div>
+    </div>
+
+    <div class="profile-card">
+      <div class="profile-banner"><div class="banner-fade"></div></div>
+      <div class="profile-body">
+        <div class="profile-avatar"><%= candidate.CNAME.charAt(0) %></div>
+        <div class="profile-name"><%= candidate.CNAME %></div>
+        <div class="profile-pos">Candidate for SBA Election</div>
+
+        <% if (candidate.DESC) { %><div class="profile-desc"><%= candidate.DESC %></div><% } %>
+
+        <% if (members && members.length > 0) { %>
+          <div class="member-title">Campaign Members</div>
+          <div class="member-list">
+            <% members.forEach(function(m) { %>
+              <div class="member-item">
+                <div class="member-avatar"><%= m.MNAME.charAt(0) %></div>
+                <div class="member-info">
+                  <div class="name"><%= m.MNAME %></div>
+                  <div class="role"><%= m.POSITION %></div>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <a href="/candidates" class="back-btn">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        Back to Candidates
+      </a>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      var el = document.getElementById('countdown');
+      if (!el) return;
+      var deadline = new Date('<%= deadline %>').getTime();
+      function update() {
+        var now = Date.now();
+        var diff = deadline - now;
+        if (diff <= 0) {
+          el.className = 'countdown ended';
+          el.innerHTML = 'Polls closed';
+          document.dispatchEvent(new Event('pollsclosed'));
+          return;
+        }
+        var d = Math.floor(diff / 86400000);
+        var h = Math.floor((diff % 86400000) / 3600000);
+        var m = Math.floor((diff % 3600000) / 60000);
+        var s = Math.floor((diff % 60000) / 1000);
+        el.innerHTML =
+          '<span class="closes-label">Polls close in</span>' +
+          '<div class="unit"><span class="num">' + d + '</span><span class="unit-label">days</span></div>' +
+          '<span class="sep">:</span>' +
+          '<div class="unit"><span class="num">' + pad(h) + '</span><span class="unit-label">hrs</span></div>' +
+          '<span class="sep">:</span>' +
+          '<div class="unit"><span class="num">' + pad(m) + '</span><span class="unit-label">min</span></div>' +
+          '<span class="sep">:</span>' +
+          '<div class="unit"><span class="num">' + pad(s) + '</span><span class="unit-label">sec</span></div>';
+      }
+      function pad(n) { return n < 10 ? '0' + n : '' + n; }
+      update();
+      setInterval(update, 1000);
+    })();
+  </script>
+</body>
+</html>

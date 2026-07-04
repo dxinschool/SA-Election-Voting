@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> — Teacher Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #111111; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+    a { text-decoration: none; color: inherit; }
+
+    .container { width: 100%; max-width: 700px; padding: 24px; }
+
+    .header { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; margin-bottom: 24px; }
+    .header h1 { font-size: 1.25rem; font-weight: 600; }
+    .header a { font-size: 0.875rem; color: #a3a3a3; }
+    .header a:hover { color: #ffffff; }
+
+    .card { background: #09090b; border: 1px solid #262626; border-radius: 10px; padding: 28px; margin-bottom: 20px; }
+    .card-title { font-size: 0.7rem; font-weight: 600; color: #71717a; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 16px; }
+
+    .stat-row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .stat-box { flex: 1; min-width: 100px; text-align: center; }
+    .stat-box .num { font-size: 1.8rem; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+    .stat-box .label { font-size: 0.7rem; color: #71717a; text-transform: uppercase; letter-spacing: 0.06em; }
+
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 0.8rem; font-weight: 500; color: #a3a3a3; margin-bottom: 6px; }
+    .form-group input {
+      width: 100%; height: 44px; padding: 8px 12px;
+      background: #111111; border: 1px solid #262626; border-radius: 6px;
+      font-size: 0.85rem; font-family: 'Inter', sans-serif;
+      color: #ffffff; outline: none;
+    }
+    .form-group input:focus { border-color: #8A5DF4; }
+    .form-group .current { font-size: 0.75rem; color: #71717a; margin-top: 4px; }
+
+    .btn {
+      height: 40px; padding: 0 24px; border: none; border-radius: 6px;
+      font-size: 0.85rem; font-weight: 500; font-family: 'Inter', sans-serif;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .btn-primary { background: #8A5DF4; color: #ffffff; }
+    .btn-primary:hover { background: #7c3aed; }
+    .btn-success { background: #22c55e; color: #ffffff; }
+    .btn-success:hover { background: #16a34a; }
+    .btn-danger { background: #ef4444; color: #ffffff; }
+    .btn-danger:hover { background: #dc2626; }
+    .btn-small { height: 32px; padding: 0 14px; font-size: 0.75rem; }
+
+    .success-msg {
+      font-size: 0.85rem; color: #22c55e; text-align: center; margin-bottom: 16px;
+      padding: 12px; background: rgba(34,197,94,0.08);
+      border: 1px solid rgba(34,197,94,0.2); border-radius: 6px;
+    }
+    .error-msg {
+      font-size: 0.85rem; color: #ef4444; text-align: center; margin-bottom: 16px;
+      padding: 12px; background: rgba(239,68,68,0.08);
+      border: 1px solid rgba(239,68,68,0.2); border-radius: 6px;
+    }
+
+    .toggle-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 500; margin-bottom: 16px;
+    }
+    .toggle-badge.enabled { background: rgba(34,197,94,0.1); color: #22c55e; border: 1px solid rgba(34,197,94,0.2); }
+    .toggle-badge.disabled { background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); }
+    .toggle-badge .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+
+    .candidate-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 0; border-bottom: 1px solid #262626;
+    }
+    .candidate-row:last-child { border-bottom: none; }
+    .candidate-row .info { flex: 1; }
+    .candidate-row .name { font-size: 0.9rem; font-weight: 500; }
+    .candidate-row .meta { font-size: 0.75rem; color: #71717a; margin-top: 2px; }
+
+    .form-row { display: flex; gap: 12px; }
+    .form-row .form-group { flex: 1; }
+
+    .reset-section { border-color: rgba(239,68,68,0.2); }
+    .reset-section .card-title { color: #ef4444; }
+    .reset-desc { font-size: 0.85rem; color: #a3a3a3; margin-bottom: 16px; line-height: 1.5; }
+
+    .divider { height: 1px; background: #262626; margin: 24px 0; }
+
+    @media (max-width: 480px) {
+      .container { padding: 16px; }
+      .card { padding: 20px; }
+      .form-row { flex-direction: column; gap: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Teacher Dashboard</h1>
+      <a href="/teacher/logout">Sign Out</a>
+    </div>
+
+    <% if (success) { %><div class="success-msg"><%= success %></div><% } %>
+    <% if (error) { %><div class="error-msg"><%= error %></div><% } %>
+
+    <div class="card">
+      <div class="card-title">Election Overview</div>
+      <div class="stat-row">
+        <div class="stat-box"><div class="num"><%= totalStudents %></div><div class="label">Students</div></div>
+        <div class="stat-box"><div class="num"><%= totalVoted %></div><div class="label">Voted</div></div>
+        <div class="stat-box"><div class="num"><%= totalStudents - totalVoted %></div><div class="label">Remaining</div></div>
+        <div class="stat-box"><div class="num"><%= candidates.length %></div><div class="label">Candidates</div></div>
+        <div class="stat-box"><div class="num"><%= blankVotes %></div><div class="label">Blank</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Voting Status</div>
+      <div class="toggle-badge <%= votingEnabled ? 'enabled' : 'disabled' %>">
+        <span class="dot"></span> Voting is currently <strong><%= votingEnabled ? 'ENABLED' : 'DISABLED' %></strong>
+      </div>
+      <form method="POST" action="/teacher/toggle-voting">
+        <button type="submit" class="btn <%= votingEnabled ? 'btn-danger' : 'btn-success' %>">
+          <%= votingEnabled ? 'Disable Voting' : 'Enable Voting' %>
+        </button>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Candidates</div>
+      <% if (candidates.length > 0) { %>
+        <% candidates.forEach(function(c) { %>
+          <div class="candidate-row">
+            <div class="info">
+              <div class="name"><%= c.CNAME %></div>
+              <div class="meta"><%= c.DESC ? c.DESC.substring(0, 60) + (c.DESC.length > 60 ? '...' : '') : 'No description' %></div>
+            </div>
+            <div style="display:flex;gap:8px;flex-shrink:0;">
+              <a href="/teacher/candidate/edit/<%= c.CID %>" class="btn btn-small" style="background:#111111;border:1px solid #262626;color:#ffffff;text-decoration:none;display:inline-flex;align-items:center;height:32px;padding:0 14px;font-size:0.75rem;border-radius:6px;">Edit</a>
+              <form method="POST" action="/teacher/candidate/delete">
+                <input type="hidden" name="cid" value="<%= c.CID %>">
+                <button type="submit" class="btn btn-danger btn-small" onclick="return confirm('Delete <%= c.CNAME %>? This cannot be undone.')">Delete</button>
+              </form>
+            </div>
+          </div>
+        <% }); %>
+      <% } else { %>
+        <div style="font-size:0.85rem;color:#71717a;padding:8px 0;">No candidates yet.</div>
+      <% } %>
+
+      <div class="divider"></div>
+
+      <div class="card-title">Add Candidate</div>
+      <form method="POST" action="/teacher/candidate/add">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="cname">Full Name</label>
+            <input type="text" id="cname" name="cname" placeholder="e.g. Maria Santos" required>
+          </div>
+          <div class="form-group">
+            <label for="sid">Student ID (optional)</label>
+            <input type="text" id="sid" name="sid" placeholder="e.g. SBA-2501">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="desc">Description</label>
+          <input type="text" id="desc" name="desc" placeholder="e.g. Focus on campus improvements">
+        </div>
+        <button type="submit" class="btn btn-primary">Add Candidate</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Election Deadline</div>
+      <form method="POST" action="/teacher/settings">
+        <div class="form-group">
+          <label for="deadline">Set new deadline</label>
+          <input type="datetime-local" id="deadline" name="deadline" value="<%= deadlineInput %>">
+          <div class="current">Current: <%= deadlineDisplay %></div>
+        </div>
+        <button type="submit" class="btn btn-primary">Update Deadline</button>
+      </form>
+    </div>
+
+    <div class="card reset-section">
+      <div class="card-title">Reset Election</div>
+      <div class="reset-desc">This will clear all votes and ballots. Candidates and students will be preserved. This action cannot be undone.</div>
+      <form method="POST" action="/teacher/reset" onsubmit="return confirm('Are you sure? This will delete all votes and cannot be undone.')">
+        <button type="submit" class="btn btn-danger">Reset All Votes</button>
+      </form>
+    </div>
+
+    <div class="divider"></div>
+
+    <div style="text-align:center;padding-bottom:32px;">
+      <a href="/home" style="font-size:0.85rem;color:#8A5DF4;">Go to Student Dashboard →</a>
+    </div>
+  </div>
+  <script>
+    (function() {
+      var banners = document.querySelectorAll('.success-msg, .error-msg');
+      if (banners.length) setTimeout(function() {
+        banners.forEach(function(b) { b.style.transition = 'opacity .5s'; b.style.opacity = '0'; setTimeout(function() { b.style.display = 'none'; }, 500); });
+      }, 3500);
+    })();
+  </script>
+</body>
+</html>

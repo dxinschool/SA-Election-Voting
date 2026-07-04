@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> — Edit Candidate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #111111; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+    a { text-decoration: none; color: inherit; }
+
+    .container { width: 100%; max-width: 500px; padding: 24px; }
+
+    .header { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; margin-bottom: 24px; }
+    .header h1 { font-size: 1.25rem; font-weight: 600; }
+    .header a { font-size: 0.875rem; color: #a3a3a3; }
+    .header a:hover { color: #ffffff; }
+
+    .card { background: #09090b; border: 1px solid #262626; border-radius: 10px; padding: 28px; margin-bottom: 20px; }
+
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 0.8rem; font-weight: 500; color: #a3a3a3; margin-bottom: 6px; }
+    .form-group input, .form-group textarea {
+      width: 100%; padding: 10px 12px;
+      background: #111111; border: 1px solid #262626; border-radius: 6px;
+      font-size: 0.85rem; font-family: 'Inter', sans-serif;
+      color: #ffffff; outline: none;
+    }
+    .form-group input:focus, .form-group textarea:focus { border-color: #8A5DF4; }
+    .form-group textarea { min-height: 80px; resize: vertical; }
+
+    .btn {
+      height: 40px; padding: 0 24px; border: none; border-radius: 6px;
+      font-size: 0.85rem; font-weight: 500; font-family: 'Inter', sans-serif;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .btn-primary { background: #8A5DF4; color: #ffffff; }
+    .btn-primary:hover { background: #7c3aed; }
+
+    .error-msg {
+      font-size: 0.85rem; color: #ef4444; text-align: center; margin-bottom: 16px;
+      padding: 12px; background: rgba(239,68,68,0.08);
+      border: 1px solid rgba(239,68,68,0.2); border-radius: 6px;
+    }
+
+    @media (max-width: 480px) {
+      .container { padding: 16px; }
+      .card { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Edit Candidate</h1>
+      <a href="/teacher">Back to Dashboard</a>
+    </div>
+
+    <% if (error) { %><div class="error-msg"><%= error %></div><% } %>
+
+    <div class="card">
+      <form method="POST" action="/teacher/candidate/edit/<%= candidate.CID %>">
+        <div class="form-group">
+          <label for="cname">Full Name</label>
+          <input type="text" id="cname" name="cname" value="<%= candidate.CNAME %>" required>
+        </div>
+        <div class="form-group">
+          <label for="sid">Student ID</label>
+          <input type="text" id="sid" name="sid" value="<%= candidate.SID || '' %>" placeholder="e.g. SBA-2501">
+        </div>
+        <div class="form-group">
+          <label for="desc">Description</label>
+          <textarea id="desc" name="desc"><%= candidate.DESC || '' %></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

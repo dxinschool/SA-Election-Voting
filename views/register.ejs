@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> — Register</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #111111;
+      color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    a { text-decoration: none; }
+
+    .form-container { width: 100%; max-width: 448px; }
+
+    .header-text { text-align: center; margin-bottom: 32px; }
+    .header-text h1 { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.025em; margin-bottom: 4px; }
+    .header-text p { font-size: 0.875rem; font-weight: 500; color: #a3a3a3; }
+
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 8px; }
+    .form-group input {
+      width: 100%; height: 44px; padding: 8px 12px;
+      background: #111111; border: 1px solid #262626; border-radius: 6px;
+      font-size: 0.75rem; font-weight: 500; font-family: 'Inter', sans-serif;
+      color: #ffffff; outline: none; transition: border-color 0.2s;
+    }
+    .form-group input:focus { border-color: #404040; }
+    .form-group input::placeholder { color: #a3a3a3; }
+
+    .btn {
+      width: 100%; height: 44px; padding: 8px 16px;
+      border: none; border-radius: 6px;
+      font-size: 0.875rem; font-weight: 500; font-family: 'Inter', sans-serif;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .btn-primary { background: #8A5DF4; color: #ffffff; }
+    .btn-primary:hover { background: #7c3aed; }
+    .btn-primary:active { transform: scale(0.98); }
+
+    .footer-text { text-align: center; margin-top: 16px; font-size: 0.75rem; color: #a3a3a3; }
+    .footer-text a { color: inherit; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
+    .footer-text a:hover { color: #8A5DF4; }
+
+    .error-msg {
+      font-size: 0.8rem; color: #ef4444; text-align: center; margin-bottom: 16px;
+      padding: 10px; background: rgba(239,68,68,0.08);
+      border: 1px solid rgba(239,68,68,0.15); border-radius: 6px;
+    }
+    .success-msg {
+      font-size: 0.8rem; color: #22c55e; text-align: center; margin-bottom: 16px;
+      padding: 10px; background: rgba(34,197,94,0.08);
+      border: 1px solid rgba(34,197,94,0.2); border-radius: 6px;
+    }
+
+    @media (max-width: 480px) {
+      .form-container { padding: 0 16px; }
+      .header-text h1 { font-size: 1.25rem; }
+      .header-text p { font-size: 0.8rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <div class="header-text">
+      <h1>Student Registration</h1>
+      <p>Create your account to vote</p>
+    </div>
+
+    <% if (error) { %><div class="error-msg"><%= error %></div><% } %>
+    <% if (success) { %><div class="success-msg"><%= success %></div><% } %>
+
+    <form method="POST" action="/register">
+      <div class="form-group">
+        <label for="sid">Student ID</label>
+        <input type="text" id="sid" name="sid" placeholder="e.g. SBA-2501" required>
+      </div>
+      <div class="form-group">
+        <label for="name">Full Name</label>
+        <input type="text" id="name" name="name" placeholder="e.g. Juan Dela Cruz" required>
+      </div>
+      <div class="form-group">
+        <label for="section">Section</label>
+        <input type="text" id="section" name="section" placeholder="e.g. IT-3A" required>
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="e.g. juan@example.com" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Register</button>
+    </form>
+
+    <div class="footer-text">
+      <a href="/login">Already have an account? Sign in →</a>
+    </div>
+  </div>
+</body>
+</html>
