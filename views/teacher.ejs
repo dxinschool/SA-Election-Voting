@@ -135,7 +135,7 @@
           <div class="candidate-row">
             <div class="info">
               <div class="name"><%= c.CNAME %></div>
-              <div class="meta"><%= c.DESC ? c.DESC.substring(0, 60) + (c.DESC.length > 60 ? '...' : '') : 'No description' %></div>
+              <div class="meta"><%= c.POSITION ? c.POSITION + (c.DESC ? ' — ' : '') : '' %><%= c.DESC ? c.DESC.substring(0, 60) + (c.DESC.length > 60 ? '...' : '') : 'No description' %></div>
             </div>
             <div style="display:flex;gap:8px;flex-shrink:0;">
               <a href="/teacher/candidate/edit/<%= c.CID %>" class="btn btn-small" style="background:#111111;border:1px solid #262626;color:#ffffff;text-decoration:none;display:inline-flex;align-items:center;height:32px;padding:0 14px;font-size:0.75rem;border-radius:6px;">Edit</a>
@@ -160,14 +160,35 @@
             <input type="text" id="cname" name="cname" placeholder="e.g. Maria Santos" required>
           </div>
           <div class="form-group">
+            <label for="position">Position</label>
+            <input type="text" id="position" name="position" placeholder="e.g. President">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
             <label for="sid">Student ID (optional)</label>
             <input type="text" id="sid" name="sid" placeholder="e.g. SBA-2501">
           </div>
         </div>
         <div class="form-group">
-          <label for="desc">Description</label>
+          <label for="desc">Description / Platform</label>
           <input type="text" id="desc" name="desc" placeholder="e.g. Focus on campus improvements">
         </div>
+
+        <div style="font-size:0.75rem;font-weight:600;color:#71717a;text-transform:uppercase;letter-spacing:0.06em;margin:16px 0 8px;">Campaign Members (optional)</div>
+        <div class="member-row" style="display:flex;gap:8px;margin-bottom:8px;">
+          <input type="text" name="member_name" placeholder="Full name" style="flex:1;height:38px;padding:6px 10px;background:#111111;border:1px solid #262626;border-radius:6px;font-size:0.8rem;font-family:'Inter',sans-serif;color:#fff;outline:none;">
+          <input type="text" name="member_role" placeholder="Role" style="flex:0 0 140px;height:38px;padding:6px 10px;background:#111111;border:1px solid #262626;border-radius:6px;font-size:0.8rem;font-family:'Inter',sans-serif;color:#fff;outline:none;">
+        </div>
+        <div class="member-row" style="display:flex;gap:8px;margin-bottom:8px;">
+          <input type="text" name="member_name" placeholder="Full name" style="flex:1;height:38px;padding:6px 10px;background:#111111;border:1px solid #262626;border-radius:6px;font-size:0.8rem;font-family:'Inter',sans-serif;color:#fff;outline:none;">
+          <input type="text" name="member_role" placeholder="Role" style="flex:0 0 140px;height:38px;padding:6px 10px;background:#111111;border:1px solid #262626;border-radius:6px;font-size:0.8rem;font-family:'Inter',sans-serif;color:#fff;outline:none;">
+        </div>
+        <div class="member-row" style="display:flex;gap:8px;margin-bottom:12px;">
+          <input type="text" name="member_name" placeholder="Full name" style="flex:1;height:38px;padding:6px 10px;background:#111111;border:1px solid #262626;border-radius:6px;font-size:0.8rem;font-family:'Inter',sans-serif;color:#fff;outline:none;">
+          <input type="text" name="member_role" placeholder="Role" style="flex:0 0 140px;height:38px;padding:6px 10px;background:#111111;border:1px solid #262626;border-radius:6px;font-size:0.8rem;font-family:'Inter',sans-serif;color:#fff;outline:none;">
+        </div>
+
         <button type="submit" class="btn btn-primary">Add Candidate</button>
       </form>
     </div>

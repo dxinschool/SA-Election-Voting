@@ -20,7 +20,6 @@ const COLORS = ['#8A5DF4', '#3b82f6', '#22c55e', '#f59e0b', '#ef4444'];
 
 // ── Helpers ──
 
-/** Convert ? placeholders to $1, $2, … for pg */
 function pg(sql, params) {
   if (!params || params.length === 0) return [sql, params];
   let idx = 0;
@@ -67,12 +66,17 @@ async function initSchema() {
       cname TEXT NOT NULL,
       slug TEXT UNIQUE NOT NULL,
       description TEXT,
-      sid TEXT REFERENCES students(sid)
+      sid TEXT REFERENCES students(sid),
+      position TEXT DEFAULT ''
     )
   `);
 
   await getPool().query(`
     ALTER TABLE candidates ADD COLUMN IF NOT EXISTS sid TEXT REFERENCES students(sid)
+  `).catch(() => {});
+
+  await getPool().query(`
+    ALTER TABLE candidates ADD COLUMN IF NOT EXISTS position TEXT DEFAULT ''
   `).catch(() => {});
 
   await getPool().query(`
@@ -131,9 +135,9 @@ async function seed() {
   await run("INSERT INTO students (sid, sname, section, email) VALUES ($1, $2, $3, $4)", ['SBA-2407', 'Jose Garcia', 'Grade 11 - ABM A', 'jose.garcia@example.com']);
   await run("INSERT INTO students (sid, sname, section, email) VALUES ($1, $2, $3, $4)", ['SBA-2408', 'Elena Rodriguez', 'Grade 12 - HUMSS A', 'elena.rodriguez@example.com']);
 
-  await run("INSERT INTO candidates (cname, slug, description, sid) VALUES ($1, $2, $3, $4)", ['Maria Santos', 'maria-santos', 'Improve campus facilities, add more student lounges, and strengthen the SBA funding for club activities.', 'SBA-2406']);
-  await run("INSERT INTO candidates (cname, slug, description, sid) VALUES ($1, $2, $3, $4)", ['Jose Garcia', 'jose-garcia', 'Focus on academic support programs, tutoring centers, and mental health awareness campaigns.', 'SBA-2407']);
-  await run("INSERT INTO candidates (cname, slug, description, sid) VALUES ($1, $2, $3, $4)", ['Elena Rodriguez', 'elena-rodriguez', 'Promote environmental sustainability, tree planting initiatives, and eco-friendly school policies.', 'SBA-2408']);
+  await run("INSERT INTO candidates (cname, slug, description, sid, position) VALUES ($1, $2, $3, $4, $5)", ['Maria Santos', 'maria-santos', 'Improve campus facilities, add more student lounges, and strengthen the SBA funding for club activities.', 'SBA-2406', 'President']);
+  await run("INSERT INTO candidates (cname, slug, description, sid, position) VALUES ($1, $2, $3, $4, $5)", ['Jose Garcia', 'jose-garcia', 'Focus on academic support programs, tutoring centers, and mental health awareness campaigns.', 'SBA-2407', 'Vice President']);
+  await run("INSERT INTO candidates (cname, slug, description, sid, position) VALUES ($1, $2, $3, $4, $5)", ['Elena Rodriguez', 'elena-rodriguez', 'Promote environmental sustainability, tree planting initiatives, and eco-friendly school policies.', 'SBA-2408', 'Secretary']);
 
   await run("INSERT INTO members (cid, mname, position) VALUES ($1, $2, $3)", [1, 'Anna Reyes', 'Campaign Manager']);
   await run("INSERT INTO members (cid, mname, position) VALUES ($1, $2, $3)", [1, 'Ben Torres', 'Treasurer']);
@@ -167,8 +171,9 @@ async function getCandidate(cid) {
   return queryOne('SELECT * FROM candidates WHERE cid = $1', [cid]);
 }
 
-async function updateCandidate(cid, cname, description, sid) {
-  await run('UPDATE candidates SET cname = $1, description = $2, sid = $3 WHERE cid = $4', [cname, description || null, sid || null, cid]);
+async function updateCandidate(cid, cname, description, sid, position) {
+  await run('UPDATE candidates SET cname = $1, description = $2, sid = $3, position = $4 WHERE cid = $5',
+    [cname, description || null, sid || null, position || '', cid]);
 }
 
 async function getCandidateBySid(sid) {
@@ -179,15 +184,31 @@ async function getMembers(cid) {
   return queryAll('SELECT * FROM members WHERE cid = $1 ORDER BY id', [cid]);
 }
 
-async function addCandidate(cname, description, sid) {
+async function addCandidate(cname, description, sid, position) {
   const slug = cname.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-  await run('INSERT INTO candidates (cname, slug, description, sid) VALUES ($1, $2, $3, $4)', [cname, slug, description || null, sid || null]);
+  const result = await getPool().query(
+    'INSERT INTO candidates (cname, slug, description, sid, position) VALUES ($1, $2, $3, $4, $5) RETURNING cid',
+    [cname, slug, description || null, sid || null, position || '']
+  );
+  return result.rows[0].cid;
 }
 
 async function deleteCandidate(cid) {
   await run('DELETE FROM members WHERE cid = $1', [cid]);
   await run('DELETE FROM votes WHERE candidate_cid = $1', [cid]);
   await run('DELETE FROM candidates WHERE cid = $1', [cid]);
+}
+
+async function addMember(cid, mname, position) {
+  const result = await getPool().query(
+    'INSERT INTO members (cid, mname, position) VALUES ($1, $2, $3) RETURNING id',
+    [cid, mname, position]
+  );
+  return result.rows[0].id;
+}
+
+async function deleteMember(id) {
+  await run('DELETE FROM members WHERE id = $1', [id]);
 }
 
 async function hasVoted(sid) {
@@ -284,7 +305,7 @@ async function getResults() {
   const allBallots = Object.values(ballotMap);
 
   if (allBallots.length === 0) {
-    return { rounds: [], winner: null, totalVoters, blankVotes };
+    return { rounds: [], winner: null, winnerPos: null, totalVoters, blankVotes };
   }
 
   const rounds = [];
@@ -336,6 +357,7 @@ async function getResults() {
   }
 
   let winner = null;
+  let winnerPos = null;
   if (remaining.length > 0) {
     const finalCounts = {};
     remaining.forEach(cid => finalCounts[cid] = 0);
@@ -351,12 +373,14 @@ async function getResults() {
     if (sortedFinal.length > 0) {
       if (sortedFinal.length === 1 || sortedFinal[0][1] > sortedFinal[1][1]) {
         const winnerCid = parseInt(sortedFinal[0][0]);
-        winner = candidates.find(c => c.cid === winnerCid)?.cname || null;
+        const winnerCandidate = candidates.find(c => c.cid === winnerCid);
+        winner = winnerCandidate?.cname || null;
+        winnerPos = winnerCandidate?.position || null;
       }
     }
   }
 
-  return { rounds, winner, totalVoters, blankVotes };
+  return { rounds, winner, winnerPos, totalVoters, blankVotes };
 }
 
 async function close() {
@@ -376,6 +400,8 @@ module.exports = {
   getMembers,
   addCandidate,
   deleteCandidate,
+  addMember,
+  deleteMember,
   hasVoted,
   isCandidate,
   getBallot,

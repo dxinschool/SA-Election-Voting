@@ -12,10 +12,12 @@ CREATE TABLE IF NOT EXISTS candidates (
   cname TEXT NOT NULL,
   slug TEXT UNIQUE NOT NULL,
   description TEXT,
-  sid TEXT REFERENCES students(sid)
+  sid TEXT REFERENCES students(sid),
+  position TEXT DEFAULT ''
 );
 
 ALTER TABLE candidates ADD COLUMN IF NOT EXISTS sid TEXT REFERENCES students(sid);
+ALTER TABLE candidates ADD COLUMN IF NOT EXISTS position TEXT DEFAULT '';
 
 CREATE TABLE IF NOT EXISTS members (
   id SERIAL PRIMARY KEY,
@@ -56,10 +58,10 @@ INSERT INTO students (sid, sname, section, email) VALUES
   ('SBA-2408', 'Elena Rodriguez', 'Grade 12 - HUMSS A', 'elena.rodriguez@example.com')
 ON CONFLICT (sid) DO NOTHING;
 
-INSERT INTO candidates (cname, slug, description, sid) VALUES
-  ('Maria Santos', 'maria-santos', 'Improve campus facilities, add more student lounges, and strengthen the SBA funding for club activities.', 'SBA-2406'),
-  ('Jose Garcia', 'jose-garcia', 'Focus on academic support programs, tutoring centers, and mental health awareness campaigns.', 'SBA-2407'),
-  ('Elena Rodriguez', 'elena-rodriguez', 'Promote environmental sustainability, tree planting initiatives, and eco-friendly school policies.', 'SBA-2408')
+INSERT INTO candidates (cname, slug, description, sid, position) VALUES
+  ('Maria Santos', 'maria-santos', 'Improve campus facilities, add more student lounges, and strengthen the SBA funding for club activities.', 'SBA-2406', 'President'),
+  ('Jose Garcia', 'jose-garcia', 'Focus on academic support programs, tutoring centers, and mental health awareness campaigns.', 'SBA-2407', 'Vice President'),
+  ('Elena Rodriguez', 'elena-rodriguez', 'Promote environmental sustainability, tree planting initiatives, and eco-friendly school policies.', 'SBA-2408', 'Secretary')
 ON CONFLICT (slug) DO NOTHING;
 
 INSERT INTO members (cid, mname, position) VALUES

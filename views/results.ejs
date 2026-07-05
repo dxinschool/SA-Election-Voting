@@ -100,7 +100,7 @@
       <div class="winner-card show" id="winner-card">
         <div class="winner-label">&#9733; <%= electionOver ? 'Winner' : 'Leading' %></div>
         <div class="winner-name"><%= winner %></div>
-        <div class="winner-position">SBA President</div>
+        <div class="winner-position"><%= winnerPos || 'SBA President' %></div>
       </div>
     <% } else { %>
       <div class="winner-card" id="winner-card"></div>
