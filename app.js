@@ -247,7 +247,7 @@ app.post('/teacher/toggle-voting', requireTeacher, asyncRoute(async (req, res) =
 }));
 
 app.post('/teacher/candidate/add', requireTeacher, asyncRoute(async (req, res) => {
-  const { cname, sid, desc, position } = req.body;
+  const { cname, sid, position } = req.body;
   if (!cname) return res.redirect('/teacher?error=Name is required');
   if (sid) {
     const student = await db.findStudent(sid);
@@ -255,19 +255,7 @@ app.post('/teacher/candidate/add', requireTeacher, asyncRoute(async (req, res) =
     const existingCandidate = await db.getCandidateBySid(sid);
     if (existingCandidate) return res.redirect('/teacher?error=SID already linked to ' + existingCandidate.cname);
   }
-  const newCid = await db.addCandidate(cname, desc || null, sid || null, position || '');
-
-  // Add campaign members if provided
-  if (req.body.member_name) {
-    const names = Array.isArray(req.body.member_name) ? req.body.member_name : [req.body.member_name];
-    const roles = Array.isArray(req.body.member_role) ? req.body.member_role : [req.body.member_role];
-    for (let i = 0; i < names.length; i++) {
-      if (names[i] && names[i].trim()) {
-        await db.addMember(newCid, names[i].trim(), (roles[i] || '').trim());
-      }
-    }
-  }
-
+  await db.addCandidate(cname, null, sid || null, position || '');
   res.redirect('/teacher?success=Candidate added');
 }));
 
@@ -313,15 +301,18 @@ app.get('/teacher/candidate/edit/:cid', requireTeacher, asyncRoute(async (req, r
 
 app.post('/teacher/candidate/edit/:cid', requireTeacher, asyncRoute(async (req, res) => {
   const cid = parseInt(req.params.cid, 10);
-  const { cname, sid, desc, position } = req.body;
+  const { cname, sid, position } = req.body;
   if (!cname) return res.redirect('/teacher/candidate/edit/' + cid + '?error=Name is required');
+  // Preserve existing description (candidates manage it themselves)
+  const current = await db.getCandidate(cid);
+  if (!current) return res.redirect('/teacher?error=Candidate not found');
   if (sid) {
     const student = await db.findStudent(sid);
     if (!student) return res.redirect('/teacher/candidate/edit/' + cid + '?error=Student ID not found');
     const existingCandidate = await db.getCandidateBySid(sid);
     if (existingCandidate && existingCandidate.cid !== cid) return res.redirect('/teacher/candidate/edit/' + cid + '?error=SID already linked to ' + existingCandidate.cname);
   }
-  await db.updateCandidate(cid, cname, desc || null, sid || null, position || '');
+  await db.updateCandidate(cid, cname, current.description, sid || null, position || '');
   res.redirect('/teacher?success=Candidate updated');
 }));
 
@@ -335,8 +326,46 @@ app.get('/candidate-panel', requireAuth, asyncRoute(async (req, res) => {
   if (!raw) return res.status(404).send('Candidate not found');
   const candidate = { CID: raw.cid, CNAME: raw.cname, SLUG: raw.slug, DESC: raw.description, POSITION: raw.position };
   const rawMembers = await db.getMembers(raw.cid);
-  const members = rawMembers.map(m => ({ MNAME: m.mname, POSITION: m.position }));
-  res.render('candidate-panel', { title: config.election.title, candidate, members });
+  const members = rawMembers.map(m => ({ ID: m.id, MNAME: m.mname, POSITION: m.position }));
+  res.render('candidate-panel', {
+    title: config.election.title,
+    candidate,
+    members,
+    success: req.query.success || null,
+    error: req.query.error || null,
+  });
+}));
+
+// ── Candidate Panel: Manage Profile ──
+
+app.post('/candidate-panel/description', requireAuth, asyncRoute(async (req, res) => {
+  const candidate = await db.getCandidateBySid(req.session.sid);
+  if (!candidate) return res.status(403).send('Not a candidate');
+  const desc = (req.body.description || '').trim();
+  await db.updateCandidateDescription(candidate.cid, desc);
+  res.redirect('/candidate-panel?success=Description updated');
+}));
+
+app.post('/candidate-panel/member/add', requireAuth, asyncRoute(async (req, res) => {
+  const candidate = await db.getCandidateBySid(req.session.sid);
+  if (!candidate) return res.status(403).send('Not a candidate');
+  const mname = (req.body.mname || '').trim();
+  const role = (req.body.role || '').trim();
+  if (!mname) return res.redirect('/candidate-panel?error=Member name is required');
+  await db.addMember(candidate.cid, mname, role);
+  res.redirect('/candidate-panel?success=Member added');
+}));
+
+app.post('/candidate-panel/member/delete', requireAuth, asyncRoute(async (req, res) => {
+  const candidate = await db.getCandidateBySid(req.session.sid);
+  if (!candidate) return res.status(403).send('Not a candidate');
+  const memberId = parseInt(req.body.member_id, 10);
+  if (!memberId) return res.redirect('/candidate-panel?error=Invalid member');
+  // Verify the member belongs to this candidate
+  const members = await db.getMembers(candidate.cid);
+  if (!members.find(m => m.id === memberId)) return res.redirect('/candidate-panel?error=Member not found');
+  await db.deleteMember(memberId);
+  res.redirect('/candidate-panel?success=Member removed');
 }));
 
 const PORT = process.env.PORT || 3000;

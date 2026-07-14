@@ -182,6 +182,10 @@ async function updateCandidate(cid, cname, description, sid, position) {
     [cname, description || null, sid || null, position || '', cid]);
 }
 
+async function updateCandidateDescription(cid, description) {
+  await run('UPDATE candidates SET description = $1 WHERE cid = $2', [description, cid]);
+}
+
 async function getCandidateBySid(sid) {
   return queryOne('SELECT * FROM candidates WHERE sid = $1', [sid]);
 }
@@ -403,6 +407,7 @@ module.exports = {
   getCandidate,
   getCandidateBySid,
   updateCandidate,
+  updateCandidateDescription,
   getMembers,
   addCandidate,
   deleteCandidate,
