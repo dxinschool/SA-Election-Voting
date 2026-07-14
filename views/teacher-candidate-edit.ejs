@@ -66,15 +66,9 @@
 
     <div class="card">
       <form method="POST" action="/teacher/candidate/edit/<%= candidate.CID %>">
-        <div class="form-row">
-          <div class="form-group">
-            <label for="cname">Full Name</label>
-            <input type="text" id="cname" name="cname" value="<%= candidate.CNAME %>" required>
-          </div>
-          <div class="form-group">
-            <label for="position">Position</label>
-            <input type="text" id="position" name="position" value="<%= candidate.POSITION || '' %>" placeholder="e.g. President">
-          </div>
+        <div class="form-group">
+          <label for="cname">Full Name</label>
+          <input type="text" id="cname" name="cname" value="<%= candidate.CNAME %>" required>
         </div>
         <div class="form-group">
           <label for="sid">Student ID</label>

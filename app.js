@@ -168,7 +168,6 @@ app.get('/results', asyncRoute(async (req, res) => {
   res.render('results', {
     title: config.election.title,
     winner: data.winner,
-    winnerPos: data.winnerPos,
     totalVoters: data.totalVoters,
     blankVotes: data.blankVotes,
     rounds: data.rounds,
@@ -247,7 +246,7 @@ app.post('/teacher/toggle-voting', requireTeacher, asyncRoute(async (req, res) =
 }));
 
 app.post('/teacher/candidate/add', requireTeacher, asyncRoute(async (req, res) => {
-  const { cname, sid, position } = req.body;
+  const { cname, sid } = req.body;
   if (!cname) return res.redirect('/teacher?error=Name is required');
   if (sid) {
     const student = await db.findStudent(sid);
@@ -255,7 +254,7 @@ app.post('/teacher/candidate/add', requireTeacher, asyncRoute(async (req, res) =
     const existingCandidate = await db.getCandidateBySid(sid);
     if (existingCandidate) return res.redirect('/teacher?error=SID already linked to ' + existingCandidate.cname);
   }
-  await db.addCandidate(cname, null, sid || null, position || '');
+  await db.addCandidate(cname, null, sid || null);
   res.redirect('/teacher?success=Candidate added');
 }));
 
@@ -301,7 +300,7 @@ app.get('/teacher/candidate/edit/:cid', requireTeacher, asyncRoute(async (req, r
 
 app.post('/teacher/candidate/edit/:cid', requireTeacher, asyncRoute(async (req, res) => {
   const cid = parseInt(req.params.cid, 10);
-  const { cname, sid, position } = req.body;
+  const { cname, sid } = req.body;
   if (!cname) return res.redirect('/teacher/candidate/edit/' + cid + '?error=Name is required');
   // Preserve existing description (candidates manage it themselves)
   const current = await db.getCandidate(cid);
@@ -312,7 +311,7 @@ app.post('/teacher/candidate/edit/:cid', requireTeacher, asyncRoute(async (req, 
     const existingCandidate = await db.getCandidateBySid(sid);
     if (existingCandidate && existingCandidate.cid !== cid) return res.redirect('/teacher/candidate/edit/' + cid + '?error=SID already linked to ' + existingCandidate.cname);
   }
-  await db.updateCandidate(cid, cname, current.description, sid || null, position || '');
+  await db.updateCandidate(cid, cname, current.description, sid || null);
   res.redirect('/teacher?success=Candidate updated');
 }));
 
