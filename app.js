@@ -252,6 +252,8 @@ app.post('/teacher/candidate/add', requireTeacher, asyncRoute(async (req, res) =
   if (sid) {
     const student = await db.findStudent(sid);
     if (!student) return res.redirect('/teacher?error=Student ID not found');
+    const existingCandidate = await db.getCandidateBySid(sid);
+    if (existingCandidate) return res.redirect('/teacher?error=SID already linked to ' + existingCandidate.cname);
   }
   const newCid = await db.addCandidate(cname, desc || null, sid || null, position || '');
 
@@ -316,6 +318,8 @@ app.post('/teacher/candidate/edit/:cid', requireTeacher, asyncRoute(async (req, 
   if (sid) {
     const student = await db.findStudent(sid);
     if (!student) return res.redirect('/teacher/candidate/edit/' + cid + '?error=Student ID not found');
+    const existingCandidate = await db.getCandidateBySid(sid);
+    if (existingCandidate && existingCandidate.cid !== cid) return res.redirect('/teacher/candidate/edit/' + cid + '?error=SID already linked to ' + existingCandidate.cname);
   }
   await db.updateCandidate(cid, cname, desc || null, sid || null, position || '');
   res.redirect('/teacher?success=Candidate updated');

@@ -71,12 +71,18 @@ async function initSchema() {
     )
   `);
 
+  // Migration: add sid + position columns, and enforce unique SID per candidate
   await getPool().query(`
     ALTER TABLE candidates ADD COLUMN IF NOT EXISTS sid TEXT REFERENCES students(sid)
   `).catch(() => {});
 
   await getPool().query(`
     ALTER TABLE candidates ADD COLUMN IF NOT EXISTS position TEXT DEFAULT ''
+  `).catch(() => {});
+
+  // Unique index prevents one SID being linked to multiple candidates (multiple NULLs allowed)
+  await getPool().query(`
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_candidates_sid ON candidates(sid)
   `).catch(() => {});
 
   await getPool().query(`
