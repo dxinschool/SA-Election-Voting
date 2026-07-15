@@ -73,11 +73,10 @@ async function getMembers(cid) {
 
 async function addCandidate(cname, description, sid, position) {
   const slug = cname.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-  const result = await getPool().query(
-    'INSERT INTO candidates (cname, slug, description, sid, position) VALUES ($1, $2, $3, $4, $5) RETURNING cid',
+  await run(
+    'INSERT INTO candidates (cname, slug, description, sid, position) VALUES ($1, $2, $3, $4, $5)',
     [cname, slug, description || null, sid || null, position || '']
   );
-  return result.rows[0].cid;
 }
 
 async function deleteCandidate(cid) {
@@ -87,11 +86,7 @@ async function deleteCandidate(cid) {
 }
 
 async function addMember(cid, mname, position) {
-  const result = await getPool().query(
-    'INSERT INTO members (cid, mname, position) VALUES ($1, $2, $3) RETURNING id',
-    [cid, mname, position]
-  );
-  return result.rows[0].id;
+  await run('INSERT INTO members (cid, mname, position) VALUES ($1, $2, $3)', [cid, mname, position]);
 }
 
 async function deleteMember(id) {
