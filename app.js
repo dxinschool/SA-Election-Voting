@@ -61,6 +61,9 @@ app.get('/', (req, res) => {
   res.render('login', { title: config.election.title, error: null });
 });
 
+// /login redirects to / for convenience
+app.get('/login', (req, res) => res.redirect('/'));
+
 app.post('/login', asyncRoute(async (req, res) => {
   const student = await db.findStudent(req.body.sid);
   if (!student) return res.render('login', { title: config.election.title, error: 'Invalid Student ID' });
