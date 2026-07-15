@@ -98,13 +98,6 @@ async function hasVoted(sid) {
   return row.count > 0;
 }
 
-async function getBallot(sid) {
-  return queryAll(
-    'SELECT candidate_cid, preference FROM votes WHERE voter_sid = $1 ORDER BY preference',
-    [sid]
-  );
-}
-
 async function castVote(sid, preferences) {
   const client = await getPool().connect();
   try {
@@ -263,9 +256,6 @@ async function getResults() {
   return { rounds, winner, winnerPos, totalVoters, blankVotes };
 }
 
-async function close() {
-  if (pool) await pool.end();
-}
 
 module.exports = {
   findStudent,
@@ -283,7 +273,6 @@ module.exports = {
   deleteMember,
   hasVoted,
   isCandidate,
-  getBallot,
   castVote,
   getResults,
   getBlankVotes,
@@ -292,5 +281,4 @@ module.exports = {
   getSetting,
   setSetting,
   resetElection,
-  close,
 };
