@@ -120,7 +120,7 @@ app.get('/home', requireAuth, asyncRoute(async (req, res) => {
 
 app.get('/candidates', requireAuth, asyncRoute(async (req, res) => {
   const raw = await db.getAllCandidates();
-  const candidates = raw.map(c => ({ CID: c.cid, CNAME: c.cname, SLUG: c.slug, DESC: c.description, POSITION: c.position }));
+  const candidates = raw.map(c => ({ CID: c.cid, CNAME: c.cname, SLUG: c.slug, DESC: c.description }));
   const viewOnly = req.query.view === '1';
   const votingEnabled = await db.getSetting('voting_enabled', 'true') === 'true';
   res.render('candidates', { title: config.election.title, candidates, viewOnly, votingEnabled });
@@ -129,7 +129,7 @@ app.get('/candidates', requireAuth, asyncRoute(async (req, res) => {
 app.get('/candidate/:slug', requireAuth, asyncRoute(async (req, res) => {
   const raw = await db.getCandidateBySlug(req.params.slug);
   if (!raw) return res.status(404).send('Association not found');
-  const candidate = { CID: raw.cid, CNAME: raw.cname, SLUG: raw.slug, DESC: raw.description, POSITION: raw.position };
+  const candidate = { CID: raw.cid, CNAME: raw.cname, SLUG: raw.slug, DESC: raw.description };
   const rawMembers = await db.getMembers(raw.cid);
   const members = rawMembers.map(m => ({ MNAME: m.mname, POSITION: m.position }));
   res.render('candidate', { title: config.election.title, candidate, members, view: req.query.view === '1' });
@@ -189,7 +189,7 @@ app.get('/teacher', requireTeacher, asyncRoute(async (req, res) => {
   const totalVoted = await db.getTotalVotesCast();
   const blankVotes = await db.getBlankVotes();
   const rawCandidates = await db.getAllCandidates();
-  const candidates = rawCandidates.map(c => ({ CID: c.cid, CNAME: c.cname, DESC: c.description, POSITION: c.position }));
+  const candidates = rawCandidates.map(c => ({ CID: c.cid, CNAME: c.cname, DESC: c.description }));
   const rawDeadline = await db.getSetting('election_deadline', config.election.deadline);
   const votingEnabled = await db.getSetting('voting_enabled', 'true') === 'true';
   const d = new Date(rawDeadline);
@@ -288,7 +288,7 @@ app.get('/teacher/candidate/edit/:cid', requireTeacher, asyncRoute(async (req, r
   const cid = parseInt(req.params.cid, 10);
   const raw = await db.getCandidate(cid);
   if (!raw) return res.redirect('/teacher?error=Candidate not found');
-  const candidate = { CID: raw.cid, CNAME: raw.cname, DESC: raw.description, SID: raw.sid, POSITION: raw.position };
+  const candidate = { CID: raw.cid, CNAME: raw.cname, DESC: raw.description, SID: raw.sid };
   const members = await db.getMembers(cid);
   const memberList = members.map(m => ({ ID: m.id, MNAME: m.mname, POSITION: m.position }));
   res.render('teacher-candidate-edit', {
@@ -325,7 +325,7 @@ app.get('/candidate-panel', requireAuth, asyncRoute(async (req, res) => {
   }
   const raw = await db.getCandidateBySid(req.session.sid);
   if (!raw) return res.status(404).send('Candidate not found');
-  const candidate = { CID: raw.cid, CNAME: raw.cname, SLUG: raw.slug, DESC: raw.description, POSITION: raw.position };
+  const candidate = { CID: raw.cid, CNAME: raw.cname, SLUG: raw.slug, DESC: raw.description };
   const rawMembers = await db.getMembers(raw.cid);
   const members = rawMembers.map(m => ({ ID: m.id, MNAME: m.mname, POSITION: m.position }));
   res.render('candidate-panel', {

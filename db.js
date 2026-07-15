@@ -54,9 +54,9 @@ async function getCandidate(cid) {
   return queryOne('SELECT * FROM candidates WHERE cid = $1', [cid]);
 }
 
-async function updateCandidate(cid, cname, description, sid, position) {
-  await run('UPDATE candidates SET cname = $1, description = $2, sid = $3, position = $4 WHERE cid = $5',
-    [cname, description || null, sid || null, position || '', cid]);
+async function updateCandidate(cid, cname, description, sid) {
+  await run('UPDATE candidates SET cname = $1, description = $2, sid = $3 WHERE cid = $4',
+    [cname, description || null, sid || null, cid]);
 }
 
 async function updateCandidateDescription(cid, description) {
@@ -179,7 +179,7 @@ async function getResults() {
   const allBallots = Object.values(ballotMap);
 
   if (allBallots.length === 0) {
-    return { rounds: [], winner: null, winnerPos: null, totalVoters, blankVotes };
+    return { rounds: [], winner: null, totalVoters, blankVotes };
   }
 
   const rounds = [];
@@ -231,7 +231,6 @@ async function getResults() {
   }
 
   let winner = null;
-  let winnerPos = null;
   if (remaining.length > 0) {
     const finalCounts = {};
     remaining.forEach(cid => finalCounts[cid] = 0);
@@ -249,12 +248,11 @@ async function getResults() {
         const winnerCid = parseInt(sortedFinal[0][0]);
         const winnerCandidate = candidates.find(c => c.cid === winnerCid);
         winner = winnerCandidate?.cname || null;
-        winnerPos = winnerCandidate?.position || null;
       }
     }
   }
 
-  return { rounds, winner, winnerPos, totalVoters, blankVotes };
+  return { rounds, winner, totalVoters, blankVotes };
 }
 
 

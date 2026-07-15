@@ -6,7 +6,4 @@ module.exports = {
   admin: {
     password: 'teacher123',
   },
-  database: {
-    url: process.env.DATABASE_URL, // must be set via environment variable
-  },
 };
