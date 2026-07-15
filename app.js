@@ -39,13 +39,12 @@ function requireAuth(req, res, next) {
 
 (async () => {
   try {
-    await db.initSchema();
-    await db.seed();
+    // Verify DB connection by running a simple query
+    await db.getTotalVoters();
     console.log('Database connected and ready');
   } catch (e) {
     console.error('Database connection failed:', e.message);
     console.error('The app will still start, but DB features will be unavailable.');
-    console.error('If deploying, ensure the cloud platform has IPv6 connectivity.');
   }
 })();
 

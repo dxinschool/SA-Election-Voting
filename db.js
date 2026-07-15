@@ -32,113 +32,6 @@ async function run(sql, params) {
   await getPool().query(sql, params);
 }
 
-// ── Init ──
-
-async function initSchema() {
-  await getPool().query(`
-    CREATE TABLE IF NOT EXISTS students (
-      sid TEXT PRIMARY KEY,
-      sname TEXT NOT NULL,
-      section TEXT NOT NULL,
-      email TEXT
-    )
-  `);
-
-  await getPool().query(`
-    CREATE TABLE IF NOT EXISTS candidates (
-      cid SERIAL PRIMARY KEY,
-      cname TEXT NOT NULL,
-      slug TEXT UNIQUE NOT NULL,
-      description TEXT,
-      sid TEXT REFERENCES students(sid),
-      position TEXT DEFAULT ''
-    )
-  `);
-
-  // Migration: add sid + position columns, and enforce unique SID per candidate
-  await getPool().query(`
-    ALTER TABLE candidates ADD COLUMN IF NOT EXISTS sid TEXT REFERENCES students(sid)
-  `).catch(() => {});
-
-  await getPool().query(`
-    ALTER TABLE candidates ADD COLUMN IF NOT EXISTS position TEXT DEFAULT ''
-  `).catch(() => {});
-
-  // Unique index prevents one SID being linked to multiple candidates (multiple NULLs allowed)
-  await getPool().query(`
-    CREATE UNIQUE INDEX IF NOT EXISTS idx_candidates_sid ON candidates(sid)
-  `).catch(() => {});
-
-  await getPool().query(`
-    CREATE TABLE IF NOT EXISTS members (
-      id SERIAL PRIMARY KEY,
-      cid INTEGER NOT NULL REFERENCES candidates(cid),
-      mname TEXT NOT NULL,
-      position TEXT NOT NULL
-    )
-  `);
-
-  await getPool().query(`
-    CREATE TABLE IF NOT EXISTS ballots (
-      voter_sid TEXT PRIMARY KEY REFERENCES students(sid),
-      created_at TIMESTAMP DEFAULT NOW()
-    )
-  `);
-
-  await getPool().query(`
-    CREATE TABLE IF NOT EXISTS votes (
-      id SERIAL PRIMARY KEY,
-      voter_sid TEXT NOT NULL REFERENCES ballots(voter_sid),
-      candidate_cid INTEGER NOT NULL REFERENCES candidates(cid),
-      preference INTEGER NOT NULL CHECK(preference >= 1),
-      UNIQUE(voter_sid, preference),
-      UNIQUE(voter_sid, candidate_cid)
-    )
-  `);
-
-  await getPool().query(`
-    CREATE TABLE IF NOT EXISTS settings (
-      key TEXT PRIMARY KEY,
-      value TEXT NOT NULL
-    )
-  `);
-
-  console.log('Schema ready');
-}
-
-// ── Seed ──
-
-async function seed() {
-  const existing = await queryAll('SELECT COUNT(*)::int AS count FROM candidates');
-  if (existing[0].count > 0) {
-    console.log('Already seeded, skipping');
-    return;
-  }
-
-  await run("INSERT INTO students (sid, sname, section, email) VALUES ($1, $2, $3, $4)", ['SBA-2401', 'Juan Dela Cruz', 'Grade 12 - STEM A', 'juan@example.com']);
-  await run("INSERT INTO students (sid, sname, section, email) VALUES ($1, $2, $3, $4)", ['SBA-2402', 'Maria Reyes', 'Grade 12 - STEM B', 'maria@example.com']);
-  await run("INSERT INTO students (sid, sname, section, email) VALUES ($1, $2, $3, $4)", ['SBA-2403', 'Carlos Santos', 'Grade 11 - ABM A', 'carlos@example.com']);
-  await run("INSERT INTO students (sid, sname, section, email) VALUES ($1, $2, $3, $4)", ['SBA-2404', 'Ana Gonzales', 'Grade 11 - HUMSS B', 'ana@example.com']);
-  await run("INSERT INTO students (sid, sname, section, email) VALUES ($1, $2, $3, $4)", ['SBA-2405', 'Pedro Lim', 'Grade 12 - STEM A', 'pedro@example.com']);
-
-  await run("INSERT INTO students (sid, sname, section, email) VALUES ($1, $2, $3, $4)", ['SBA-2406', 'Maria Santos', 'Grade 12 - STEM B', 'maria.santos@example.com']);
-  await run("INSERT INTO students (sid, sname, section, email) VALUES ($1, $2, $3, $4)", ['SBA-2407', 'Jose Garcia', 'Grade 11 - ABM A', 'jose.garcia@example.com']);
-  await run("INSERT INTO students (sid, sname, section, email) VALUES ($1, $2, $3, $4)", ['SBA-2408', 'Elena Rodriguez', 'Grade 12 - HUMSS A', 'elena.rodriguez@example.com']);
-
-  await run("INSERT INTO candidates (cname, slug, description, sid, position) VALUES ($1, $2, $3, $4, $5)", ['Maria Santos', 'maria-santos', 'Improve campus facilities, add more student lounges, and strengthen the SBA funding for club activities.', 'SBA-2406', 'President']);
-  await run("INSERT INTO candidates (cname, slug, description, sid, position) VALUES ($1, $2, $3, $4, $5)", ['Jose Garcia', 'jose-garcia', 'Focus on academic support programs, tutoring centers, and mental health awareness campaigns.', 'SBA-2407', 'Vice President']);
-  await run("INSERT INTO candidates (cname, slug, description, sid, position) VALUES ($1, $2, $3, $4, $5)", ['Elena Rodriguez', 'elena-rodriguez', 'Promote environmental sustainability, tree planting initiatives, and eco-friendly school policies.', 'SBA-2408', 'Secretary']);
-
-  await run("INSERT INTO members (cid, mname, position) VALUES ($1, $2, $3)", [1, 'Anna Reyes', 'Campaign Manager']);
-  await run("INSERT INTO members (cid, mname, position) VALUES ($1, $2, $3)", [1, 'Ben Torres', 'Treasurer']);
-  await run("INSERT INTO members (cid, mname, position) VALUES ($1, $2, $3)", [2, 'Carla Gomez', 'Campaign Manager']);
-  await run("INSERT INTO members (cid, mname, position) VALUES ($1, $2, $3)", [2, 'Ding Cruz', 'Logistics Head']);
-  await run("INSERT INTO members (cid, mname, position) VALUES ($1, $2, $3)", [3, 'Franco Lopez', 'Campaign Manager']);
-  await run("INSERT INTO members (cid, mname, position) VALUES ($1, $2, $3)", [3, 'Grace Tan', 'Secretary']);
-
-  console.log('Seed data inserted');
-}
-
 // ── Queries ──
 
 async function findStudent(sid) {
@@ -380,8 +273,6 @@ async function close() {
 }
 
 module.exports = {
-  initSchema,
-  seed,
   findStudent,
   addStudent,
   getAllCandidates,
