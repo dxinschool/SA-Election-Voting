@@ -130,7 +130,7 @@ app.get('/candidate/:slug', requireAuth, asyncRoute(async (req, res) => {
   const candidate = { CID: raw.cid, CNAME: raw.cname, SLUG: raw.slug, DESC: raw.description, POSITION: raw.position };
   const rawMembers = await db.getMembers(raw.cid);
   const members = rawMembers.map(m => ({ MNAME: m.mname, POSITION: m.position }));
-  res.render('candidate', { title: config.election.title, candidate, members });
+  res.render('candidate', { title: config.election.title, candidate, members, view: req.query.view === '1' });
 }));
 
 // ── Vote (guarded) ──

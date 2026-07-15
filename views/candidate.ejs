@@ -78,7 +78,7 @@
       <div class="header-left"><h1><%= title %></h1></div>
       <div class="header-center"><div class="countdown" id="countdown"></div></div>
       <div class="header-right">
-        <a href="/candidates">Candidates</a>
+        <a href="/candidates<%= view ? '?view=1' : '' %>">Candidates</a>
         <a href="/home">Dashboard</a>
         <a href="/logout">Sign Out</a>
       </div>
@@ -110,7 +110,7 @@
     </div>
 
     <div class="bottom-nav">
-      <a href="/candidates" class="back-btn">
+      <a href="/candidates<%= view ? '?view=1' : '' %>" class="back-btn">
         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
         Back to Candidates
       </a>
