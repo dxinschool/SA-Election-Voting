@@ -18,16 +18,8 @@ function getPool() {
 
 // ── Helpers ──
 
-function pg(sql, params) {
-  if (!params || params.length === 0) return [sql, params];
-  let idx = 0;
-  const converted = sql.replace(/\?/g, () => `$${++idx}`);
-  return [converted, params];
-}
-
 async function queryAll(sql, params) {
-  const [q, p] = pg(sql, params);
-  const result = await getPool().query(q, p);
+  const result = await getPool().query(sql, params);
   return result.rows;
 }
 
@@ -37,8 +29,7 @@ async function queryOne(sql, params) {
 }
 
 async function run(sql, params) {
-  const [q, p] = pg(sql, params);
-  await getPool().query(q, p);
+  await getPool().query(sql, params);
 }
 
 // ── Init ──
