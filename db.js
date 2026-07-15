@@ -200,7 +200,8 @@ async function getResults() {
       }
     }
 
-    const totalActive = Object.values(counts).reduce((s, x) => s + x, 0);
+    let totalActive = 0;
+    for (const val of Object.values(counts)) totalActive += val;
     const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
 
     const voteData = remaining.map(cid => ({

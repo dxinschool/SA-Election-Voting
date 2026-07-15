@@ -154,8 +154,6 @@
           el.className = 'countdown ended';
           el.innerHTML = 'Polls closed';
           document.dispatchEvent(new Event('pollsclosed'));
-          // Reload page so server re-renders with Winner label
-          setTimeout(function() { location.reload(); }, 500);
           return;
         }
         var d = Math.floor(diff / 86400000);
@@ -180,7 +178,9 @@
     (function() {
       var el = document.getElementById('winner-card');
       if (!el) return;
+      var label = el.querySelector('.winner-label');
       document.addEventListener('pollsclosed', function() {
+        if (label && label.textContent.includes('Leading')) label.textContent = '\u2605 Winner';
         el.classList.add('show');
       });
     })();
