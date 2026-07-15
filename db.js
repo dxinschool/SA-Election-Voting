@@ -16,8 +16,6 @@ function getPool() {
   return pool;
 }
 
-const COLORS = ['#8A5DF4', '#3b82f6', '#22c55e', '#f59e0b', '#ef4444'];
-
 // ── Helpers ──
 
 function pg(sql, params) {
@@ -41,11 +39,6 @@ async function queryOne(sql, params) {
 async function run(sql, params) {
   const [q, p] = pg(sql, params);
   await getPool().query(q, p);
-}
-
-function colorFor(cid, allCids) {
-  const idx = allCids.indexOf(cid);
-  return COLORS[idx % COLORS.length];
 }
 
 // ── Init ──
@@ -299,7 +292,6 @@ async function getTotalVotesCast() {
 
 async function getResults() {
   const candidates = await getAllCandidates();
-  const allCids = candidates.map(c => c.cid);
   const totalVoters = await getTotalVoters();
   const blankVotes = await getBlankVotes();
 
@@ -342,7 +334,6 @@ async function getResults() {
     const voteData = remaining.map(cid => ({
       name: candidates.find(c => c.cid === cid).cname,
       count: counts[cid],
-      color: colorFor(cid, allCids),
     }));
 
     if (sorted[0][1] > totalActive / 2) {
