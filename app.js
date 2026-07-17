@@ -139,7 +139,7 @@ app.get('/candidate/:slug', requireAuth, asyncRoute(async (req, res) => {
 // ── Vote (guarded) ──
 
 app.post('/vote', requireAuth, asyncRoute(async (req, res) => {
-  if (isElectionOver()) {
+  if (await isElectionOver()) {
     return res.status(403).send('Voting has ended.');
   }
   if (await db.isCandidate(req.session.sid)) {
