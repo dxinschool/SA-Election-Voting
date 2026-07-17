@@ -149,8 +149,10 @@ app.post('/vote', requireAuth, asyncRoute(async (req, res) => {
     return res.status(403).send('Voting is currently disabled by the administrator.');
   }
   const sid = req.session.sid;
+  const allCandidates = await db.getAllCandidates();
+  const maxPrefs = allCandidates.length;
   const preferences = [];
-  for (let i = 1; i <= 10; i++) {
+  for (let i = 1; i <= maxPrefs; i++) {
     const key = 'pref' + i;
     if (req.body[key] && req.body[key] !== '') {
       preferences.push(parseInt(req.body[key], 10));
