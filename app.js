@@ -50,8 +50,9 @@ function requireAuth(req, res, next) {
 
 // ── Helpers ──
 
-function isElectionOver() {
-  return Date.now() >= new Date(config.election.deadline).getTime();
+async function isElectionOver() {
+  const deadlineStr = await db.getSetting('election_deadline', config.election.deadline);
+  return Date.now() >= new Date(deadlineStr).getTime();
 }
 
 // ── Routes ──
